@@ -11,9 +11,12 @@ unsigned long hour = 3600000UL; // one hour
 unsigned long duration2 ;
 unsigned long pumpstart ;
 
-void setup() {
-  
+int counter = 0;
 
+void setup() {
+  pinMode (pump, OUTPUT) ;
+  pinMode (motor, OUTPUT) ;
+  duration = millis();
 }
 
 void loop() {
