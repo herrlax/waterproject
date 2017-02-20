@@ -2,8 +2,8 @@
 #include <avr/pgmspace.h>
 
 // rfid tags..
-char* tag_0 = "27009CD4A0CF"; 
-char* tag_1 = "2100834E01ED";
+const char* tag_0 = "27009CD4A0CF"; 
+const char* tag_1 = "2100834E01ED";
 
 SoftwareSerial rfidReader(8,9); // Digital pins 2 and 3 connect to pins 1 and 2 of the RMD6300
 String tagString;
@@ -69,30 +69,24 @@ void loop() {
   }
 }
 
-int determineDelay(char* tagNum) {
+int determineDelay(const char *tagNum) {
 
-  char testTag[14];
+    const char *ta = "27009CD4A0CF";
 
-      Serial.print("tagNum: tag: ");
-      Serial.println(tagNum);
+    Serial.println(tagNum+1);
+    Serial.println(ta);
       
-      Serial.print("tag_0: tag: ");
-      Serial.println(tag_0);
+    if(strcmp(tagNum+1, tag_0) == 0) {
+      return 1000;
+      Serial.println("FOUND");
+    }
+    
+    if(strcmp(tagNum+1, tag_1) == 0) {
+      return 2000;
+      Serial.println("FOUND");
+    }
       
-      Serial.print("tag_1: tag: ");
-      Serial.println(tag_1);
-      
-      if(strcmp(tagNum[0], tag_0[0]) == 0) {
-        return 1000;
-        Serial.println("FOUND");
-      }
-      
-      if(strcmp(tagNum, tag_1) == 0) {
-        return 2000;
-        Serial.println("FOUND");
-      }
-      
-      return 5000;
+    return 5000;
 }
 
 // run if an rfid has been read 
