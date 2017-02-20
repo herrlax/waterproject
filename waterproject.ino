@@ -5,10 +5,12 @@
 const char* tag_0 = "27009CD4A0CF"; 
 const char* tag_1 = "2100834E01ED";
 
-SoftwareSerial rfidReader(8,9); // Digital pins 2 and 3 connect to pins 1 and 2 of the RMD6300
+SoftwareSerial rfidReader(8,9); 
 String tagString;
 char tagNumber[14];
 boolean receivedTag;
+
+int currentDelay = 0;
 
 
 // led outputs
@@ -60,21 +62,27 @@ void loop() {
   if (receivedTag){
     tagString = tagNumber;
     Serial.println();
-    Serial.print("Tag Number: ");
-    Serial.println(tagString);
     
-    int delayTime = determineDelay(tagNumber);
-  
-    pump(delayTime);
+    int delayTime = 0;
+    delayTime = determineDelay(tagNumber);
+    Serial.println("delayTime: ");
+    Serial.println(delayTime);
+    
+    Serial.println("currentDelay: ");
+    Serial.println(currentDelay);
+    
+    if(delayTime == currentDelay) {
+      return;
+    }
+    
+    
+    pump(delayTime - currentDelay);
+
+    currentDelay = abs(delayTime);
   }
 }
 
 int determineDelay(const char *tagNum) {
-
-    const char *ta = "27009CD4A0CF";
-
-    Serial.println(tagNum+1);
-    Serial.println(ta);
       
     if(strcmp(tagNum+1, tag_0) == 0) {
       return 1000;
@@ -92,13 +100,19 @@ int determineDelay(const char *tagNum) {
 // run if an rfid has been read 
 void pump(int duration) {
   
-  /*digitalWrite(pumpOutput, HIGH);  
-  delay(duration);                
-  digitalWrite(pumpOutput, LOW);   */
-
   Serial.println();
   Serial.print("Received in pump:");
-  Serial.println(duration);
+
+  // remove water..
+  if(duration < 0) {
+    Serial.println();
+    Serial.print("remove water: ");
+  } else if (duration > 0) {
+    Serial.println();
+    Serial.print("add water: ");
+  }
+  
+  Serial.println(abs(duration));
   rfidReader.flush();
 }
 
