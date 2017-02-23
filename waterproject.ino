@@ -1,5 +1,7 @@
+#include <Servo.h>
 #include <SoftwareSerial.h>
 #include <avr/pgmspace.h>
+
 
 // rfid tags..
 const char* tag_0 = "27009CD4A0CF"; 
@@ -21,7 +23,8 @@ const int led_map1    = 3;
 const int led_map2    = 4;
 const int led_map3    = 5;
 
-// motorOutput pump outputs
+Servo servoMotor;
+// outputs for motor and pump..
 const int pumpOutput  = 6; 
 const int motorOutput = 7;
 
@@ -96,12 +99,12 @@ void loop() {
 int determineDelayW(const char *tagNum) {
 
     if(strcmp(tagNum+1, tag_0) == 0) { // tagNum+1, since it starts with a blank
-      return 3000;
+      return 5000;
       Serial.println("FOUND");
     }
     
     if(strcmp(tagNum+1, tag_1) == 0) { // tagNum+1, since it starts with a blank
-      return 4000;
+      return 7000;
       Serial.println("FOUND");
     }
 
@@ -114,12 +117,12 @@ int determineDelayW(const char *tagNum) {
 int determineDelayM(const char *tagNum) {
 
     if(strcmp(tagNum+1, tag_0) == 0) { // tagNum+1, since it starts with a blank
-      return 1000;
+      return 3000;
       Serial.println("FOUND");
     }
     
     if(strcmp(tagNum+1, tag_1) == 0) { // tagNum+1, since it starts with a blank
-      return 2000;
+      return 5000;
       Serial.println("FOUND");
     }
       
@@ -131,8 +134,16 @@ int determineDelayM(const char *tagNum) {
 void pump(int duration_w, int duration_m) {
   
   Serial.println();
+  Serial.println("duration_w: ");
+  Serial.println(duration_w);
+  
+  Serial.println("duration_m: ");
+  Serial.println(duration_m);
+
+  int servoAngle = 180;
   
   if(duration_w < 0) {
+    servoAngle *= -1; // reverse direction of servo
     Serial.print("remove water: ");
     Serial.println(abs(duration_w));
     Serial.print("lower the indicator: ");
@@ -143,6 +154,10 @@ void pump(int duration_w, int duration_m) {
     Serial.print("raise the indicator: ");
     Serial.println(abs(duration_m));
   }
+
+  servoMotor.attach(motorOutput);
+  // sets angle of servomotor..
+  servoMotor.write(servoAngle);
   
   Serial.println();
 
@@ -153,9 +168,10 @@ void pump(int duration_w, int duration_m) {
   //digitalWrite(motorOutput, HIGH);
   Serial.println("POWER PUMP..");
   Serial.println("POWER MOTOR..");
-  delay(duration_m);
+  delay(abs(duration_m));
 
   // turn the motor for the indicator off, and keep the pump on..
+  servoMotor.detach();
   //digitalWrite(motorOutput, LOW);
   Serial.println("POWER PUMP..");
   delay(duration_w - duration_m);
