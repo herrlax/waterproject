@@ -2,10 +2,21 @@
 #include <SoftwareSerial.h>
 #include <avr/pgmspace.h>
 
+struct delayPair {
+    int water;
+    int motor;
+};
 
 // rfid tags..
-const char tag_0[] = "27009CD4A0CF";
-const char tag_1[] = "2100834E01ED";
+const char tag_0_A[] = "3D0047B0F53F";
+const char tag_0_B[] = "2100834E01ED";
+const char tag_0_C[] = "3C00CF0448BF";
+const char tag_1_A[] = "27001396EB49";
+const char tag_1_B[] = "27009CD4A0CF";
+const char tag_1_C[] = "0415D8761CA3";
+const char tag_2_A[] = "0415D8BBE795";
+const char tag_2_B[] = "0415EA116F85";
+const char tag_2_C[] = "0415D8A3B1DB";
 
 SoftwareSerial rfidReader(8,9);
 String tagString;
@@ -70,8 +81,9 @@ void loop() {
     int delayTime_w = 0; // delay time for filling the water
     int delayTime_m = 0; // delay time for the motor to control the tactile indicator
     
-    delayTime_w = determineDelayW(tagString);
-    delayTime_m = determineDelayM(tagString);
+    delayPair delayTime = determineDelay(tagString);
+    delayTime_w = delayTime.water;
+    delayTime_m = delayTime.motor;
     
     Serial.println("delayTime_w: ");
     Serial.println(delayTime_w);
@@ -94,51 +106,33 @@ void loop() {
   }
 }
 
-// returns water delay time depending on tagnumber
-int determineDelayW(String tagNum) {
-    
-    Serial.println("-------------");
-    Serial.println(tagNum.substring(1,13));
-    Serial.println("-------------");
-    rfidReader.flush();
-
-    if(tagNum.substring(1,13)==tag_0) {
-      return 5000;
-    }
-
-    if(tagNum.substring(1,13)==tag_1) {
-      return 7000;
-    }
-
-    // tag not recognized
-    return currentDelay_w;
-}
-
-
 // returns motor delay time depending on tagnumber
-int determineDelayM(String tagNum) {
+delayPair determineDelay(String tagNum) {
     
     Serial.println("-------------");
     Serial.println(tagNum.substring(1,13));
     Serial.println("-------------");
     rfidReader.flush();
 
-    if(tagNum.substring(1,13)==tag_0) {
-      return 3000;
+    if(tagNum.substring(1,13)==tag_0_A) {
+      return {7000, 3000};
     }
 
-    if(tagNum.substring(1,13)==tag_1) {
-      return 5000;
+    if(tagNum.substring(1,13)==tag_0_B) {
+      return {5000, 1000};
+    }
+
+    if(tagNum.substring(1,13)==tag_0_C) {
+      return {1000, 500};
     }
 
     // tag not recognized
-    return currentDelay_m;
+    return {currentDelay_w, currentDelay_m};
 }
 
 // pumps water changes the water indicator ..
 void pump(int duration_w, int duration_m) {
   
-  Serial.println();
   Serial.println("duration_w: ");
   Serial.println(duration_w);
   
@@ -149,15 +143,6 @@ void pump(int duration_w, int duration_m) {
   
   if(duration_w < 0) {
     servoAngle *= -1; // reverse direction of servo
-    Serial.print("remove water: ");
-    Serial.println(abs(duration_w));
-    Serial.print("lower the indicator: ");
-    Serial.println(abs(duration_m));
-  } else if (duration_w > 0) {
-    Serial.print("add water: ");
-    Serial.println(abs(duration_w));
-    Serial.print("raise the indicator: ");
-    Serial.println(abs(duration_m));
   }
 
   servoMotor.attach(motorOutput);
@@ -179,7 +164,7 @@ void pump(int duration_w, int duration_m) {
   servoMotor.detach();
   //digitalWrite(motorOutput, LOW);
   Serial.println("POWER PUMP..");
-  delay(duration_w - duration_m);
+  delay(abs(duration_w - duration_m));
 
   // turn off the waterpump too..
   //digitalWrite(pumpOutput, LOW); 
