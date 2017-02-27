@@ -14,9 +14,9 @@ const char tag_0_C[] = "3C00CF0448BF";
 const char tag_1_A[] = "27001396EB49";
 const char tag_1_B[] = "27009CD4A0CF";
 const char tag_1_C[] = "0415D8761CA3";
-const char tag_2_A[] = "0415D8BBE795";
-const char tag_2_B[] = "0415EA116F85";
-const char tag_2_C[] = "0415D8A3B1DB";
+const char tag_2_A[] = "210082C63B5E";
+const char tag_2_B[] = "210082CC1778";
+const char tag_2_C[] = "430003D2B527";
 
 SoftwareSerial rfidReader(8,9);
 String tagString;
