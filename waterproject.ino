@@ -4,10 +4,10 @@
 
 
 // rfid tags..
-const char* tag_0 = "27009CD4A0CF"; 
-const char* tag_1 = "2100834E01ED";
+const char tag_0[] = "27009CD4A0CF";
+const char tag_1[] = "2100834E01ED";
 
-SoftwareSerial rfidReader(8,9); 
+SoftwareSerial rfidReader(8,9);
 String tagString;
 char tagNumber[14];
 boolean receivedTag;
@@ -44,8 +44,6 @@ void setup() {
   pinMode(led_map1, OUTPUT);
   pinMode(led_map2, OUTPUT);
   pinMode(led_map3, OUTPUT);
-  duration  = millis();
-  pumpstart = millis() ;
   digitalWrite(LED_BUILTIN, LOW);
 
   // starts reading of rfid..
@@ -56,22 +54,24 @@ void setup() {
 
 void loop() {
 
-  receivedTag = false;
+  receivedTag=false;
   
-  while (rfidReader.available()) {
-    int BytesRead = rfidReader.readBytesUntil(3, tagNumber, 15); //EOT (3) is the last character in tag 
-    receivedTag = true;
+  while (rfidReader.available()){
+    int BytesRead = rfidReader.readBytesUntil(3, tagNumber, 15);//EOT (3) is the last character in tag 
+    receivedTag=true;
   }  
  
   if (receivedTag){
     tagString = tagNumber;
     Serial.println();
+    Serial.print("Tag Number: ");
+    Serial.println(tagString);
     
     int delayTime_w = 0; // delay time for filling the water
     int delayTime_m = 0; // delay time for the motor to control the tactile indicator
     
-    delayTime_w = determineDelayW(tagNumber);
-    delayTime_m = determineDelayM(tagNumber);
+    delayTime_w = determineDelayW(tagString);
+    delayTime_m = determineDelayM(tagString);
     
     Serial.println("delayTime_w: ");
     Serial.println(delayTime_w);
@@ -87,8 +87,7 @@ void loop() {
     if(delayTime_w == currentDelay_w) {
       return;
     }
-    
-    
+
     pump((delayTime_w - currentDelay_w), (delayTime_m - currentDelay_m));
     currentDelay_w = abs(delayTime_w);
     currentDelay_m = abs(delayTime_m);
@@ -96,38 +95,44 @@ void loop() {
 }
 
 // returns water delay time depending on tagnumber
-int determineDelayW(const char *tagNum) {
-
-    if(strcmp(tagNum+1, tag_0) == 0) { // tagNum+1, since it starts with a blank
-      return 5000;
-      Serial.println("FOUND");
-    }
+int determineDelayW(String tagNum) {
     
-    if(strcmp(tagNum+1, tag_1) == 0) { // tagNum+1, since it starts with a blank
+    Serial.println("-------------");
+    Serial.println(tagNum.substring(1,13));
+    Serial.println("-------------");
+    rfidReader.flush();
+
+    if(tagNum.substring(1,13)==tag_0) {
+      return 5000;
+    }
+
+    if(tagNum.substring(1,13)==tag_1) {
       return 7000;
-      Serial.println("FOUND");
     }
 
     // tag not recognized
-    return 0;
+    return currentDelay_w;
 }
 
 
 // returns motor delay time depending on tagnumber
-int determineDelayM(const char *tagNum) {
-
-    if(strcmp(tagNum+1, tag_0) == 0) { // tagNum+1, since it starts with a blank
-      return 3000;
-      Serial.println("FOUND");
-    }
+int determineDelayM(String tagNum) {
     
-    if(strcmp(tagNum+1, tag_1) == 0) { // tagNum+1, since it starts with a blank
-      return 5000;
-      Serial.println("FOUND");
+    Serial.println("-------------");
+    Serial.println(tagNum.substring(1,13));
+    Serial.println("-------------");
+    rfidReader.flush();
+
+    if(tagNum.substring(1,13)==tag_0) {
+      return 3000;
     }
-      
+
+    if(tagNum.substring(1,13)==tag_1) {
+      return 5000;
+    }
+
     // tag not recognized
-    return 0;
+    return currentDelay_m;
 }
 
 // pumps water changes the water indicator ..
@@ -140,7 +145,7 @@ void pump(int duration_w, int duration_m) {
   Serial.println("duration_m: ");
   Serial.println(duration_m);
 
-  int servoAngle = 180;
+  int servoAngle = -180;
   
   if(duration_w < 0) {
     servoAngle *= -1; // reverse direction of servo
