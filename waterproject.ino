@@ -36,8 +36,9 @@ const int led_map3    = 5;
 
 Servo servoMotor;
 // outputs for motor and pump..
-const int pumpOutput  = 6; 
-const int motorOutput = 7;
+const int pumpOutput   = 6; 
+const int magnetOutput = 10; // electromagnet removing water from tank
+const int motorOutput  = 7;
 
 unsigned long currentMillis;
 unsigned long previousMillis;
@@ -49,6 +50,7 @@ int counter = 0;
 
 void setup() {
   pinMode(pumpOutput, OUTPUT);
+  pinMode(magnetOutput, OUTPUT);
   pinMode(motorOutput, OUTPUT);
   pinMode(led_water1, OUTPUT);
   pinMode(led_water2, OUTPUT);
@@ -109,9 +111,6 @@ void loop() {
 // returns motor delay time depending on tagnumber
 delayPair determineDelay(String tagNum) {
     
-    Serial.println("-------------");
-    Serial.println(tagNum.substring(1,13));
-    Serial.println("-------------");
     rfidReader.flush();
 
     if(tagNum.substring(1,13)==tag_0_A) {
@@ -132,13 +131,6 @@ delayPair determineDelay(String tagNum) {
 
 // pumps water changes the water indicator ..
 void pump(int duration_w, int duration_m) {
-  
-  Serial.println("duration_w: ");
-  Serial.println(duration_w);
-  
-  Serial.println("duration_m: ");
-  Serial.println(duration_m);
-
   int servoAngle = -180;
   
   if(duration_w < 0) {
@@ -149,30 +141,25 @@ void pump(int duration_w, int duration_m) {
   // sets angle of servomotor..
   servoMotor.write(servoAngle);
   
-  Serial.println();
-
   // keep both water pump and motor on for their shared time,
   // asuming the motor always should be on for a shorter amount of
   // time than the waterpump
-  //digitalWrite(pumpOutput, HIGH);
-  //digitalWrite(motorOutput, HIGH);
-  Serial.println("POWER PUMP..");
-  Serial.println("POWER MOTOR..");
+
+  if(duration_w < 0) {
+    digitalWrite(magnetOutput, HIGH); // remove water..
+  } else {
+    digitalWrite(pumpOutput, HIGH);   // add water..
+  }
+  
   delay(abs(duration_m));
 
   // turn the motor for the indicator off, and keep the pump on..
   servoMotor.detach();
-  //digitalWrite(motorOutput, LOW);
-  Serial.println("POWER PUMP..");
+  
   delay(abs(duration_w - duration_m));
 
-  // turn off the waterpump too..
-  //digitalWrite(pumpOutput, LOW); 
-  
-  Serial.println("BOTH OFF PUMP AND MOTOR OFF..");
-  
-  Serial.println();
-
-  rfidReader.flush();
+  // turn off the waterpump
+  digitalWrite(magnetOutput, LOW);
+  digitalWrite(pumpOutput, LOW);
 }
 
