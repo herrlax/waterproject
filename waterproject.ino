@@ -8,14 +8,14 @@ struct delayPair {
 };
 
 // rfid tags..
-const char beef[] = "43000970A49E";
-const char mango[] = "2100834E01ED";
-const char olive[] = "4100468935BB";
+const char beef[]    = "43000970A49E";
+const char mango[]   = "2100834E01ED";
+const char olive[]   = "4100468935BB";
 const char chicken[] = "4100427798EC";
-const char coffee[] = "41004285F274";
-const char banana[] = "410043429BDB";
-const char beer[] = "210082C63B5E";
-const char tomato[] = "210082CC1778";
+const char coffee[]  = "41004285F274";
+const char banana[]  = "410043429BDB";
+const char beer[]    = "210082C63B5E";
+const char tomato[]  = "210082CC1778";
 
 SoftwareSerial rfidReader(2,3);
 String tagString;
@@ -27,13 +27,22 @@ int currentDelay_m = 0;
 
 
 // led outputs
-const int led_map4    = 4;
-const int led_map5    = 5;
-const int led_map6    = 6;
-const int led_map7    = 7;
-const int led_map8    = 8;
-const int led_map9    = 9;
-const int led_map10   = 10;
+const int led_usa      = 4;  // beef
+const int led_ecuador  = 5;  // banana
+const int led_thailand = 6;  // mango
+const int led_china    = 7;  // chicken, tomatoe
+const int led_germany  = 8;  // beer
+const int led_brazil   = 9;  // coffee
+const int led_spain    = 10; // olive
+
+const int leds[] = { led_usa,
+                     led_ecuador,
+                     led_ecuador,
+                     led_thailand,
+                     led_china,
+                     led_germany,
+                     led_brazil,
+                     led_spain };
 
 Servo servoMotor;
 // outputs for motor and pump..
@@ -51,10 +60,17 @@ int counter = 0;
 
 void setup() {
   currentMillis = millis(); 
+  
   pinMode(pumpOutput, OUTPUT);
   pinMode(magnetOutput, OUTPUT);
   pinMode(motorOutput, OUTPUT);
-  digitalWrite(LED_BUILTIN, LOW);
+  pinMode(led_usa, OUTPUT);
+  pinMode(led_ecuador, OUTPUT);
+  pinMode(led_thailand, OUTPUT);
+  pinMode(led_china, OUTPUT);
+  pinMode(led_germany, OUTPUT);
+  pinMode(led_brazil, OUTPUT);
+  pinMode(led_spain, OUTPUT);
 
   // starts reading of rfid..
   Serial.begin(9600);
