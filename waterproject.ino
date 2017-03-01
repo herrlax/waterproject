@@ -8,12 +8,12 @@ struct delayPair {
 };
 
 // rfid tags..
-const char tag_0_A[] = "3D0047B0F53F";
+const char tag_0_A[] = "43000970A49E";
 const char tag_0_B[] = "2100834E01ED";
-const char tag_0_C[] = "3C00CF0448BF";
-const char tag_1_A[] = "27001396EB49";
-const char tag_1_B[] = "27009CD4A0CF";
-const char tag_1_C[] = "0415D8761CA3";
+const char tag_0_C[] = "4100468935BB";
+const char tag_1_A[] = "4100427798EC";
+const char tag_1_B[] = "41004285F274";
+const char tag_1_C[] = "410043429BDB";
 const char tag_2_A[] = "210082C63B5E";
 const char tag_2_B[] = "210082CC1778";
 const char tag_2_C[] = "430003D2B527";
