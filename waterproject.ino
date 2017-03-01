@@ -140,42 +140,59 @@ delayPair determineDelay(String tagNum) {
     
     rfidReader.flush();
 
+    turnOffLeds(); // turns off all leds
+
     if(tagNum.substring(1,13)==beef) {
-      return {17200, 3570};
+      digitalWrite(led_usa, HIGH);
+      return {17200, 3570*1.2};
     }
 
     if(tagNum.substring(1,13)==mango) {
-      return {8240, 1073};
+      digitalWrite(led_thailand, HIGH);
+      return {8240, 1073*1.2};
     }
 
     if(tagNum.substring(1,13)==olive) {
-      return {5200, 1070};
+      digitalWrite(led_spain, HIGH);
+      return {5200, 1070*1.2};
     }
 
      if(tagNum.substring(1,13)==chicken) {
-      return {4800, 1010};
+      digitalWrite(led_china, HIGH);
+      return {4800, 1010*1.2};
     }
 
      if(tagNum.substring(1,13)==coffee) {
-      return {3200, 650};
+      digitalWrite(led_brazil, HIGH);
+      return {3200, 650*1.2};
     }
      
      if(tagNum.substring(1,13)==banana) {
-      return {2320, 480};
+      digitalWrite(led_ecuador, HIGH);
+      return {2320, 480*1.2};
     }
 
      if(tagNum.substring(1,13)==beer) {
-      return {1120, 240};
+      digitalWrite(led_germany, HIGH);
+      return {1120, 240*1.2};
     }
      
      if(tagNum.substring(1,13)==tomato) {
-      return {560, 110};
+      digitalWrite(led_china, HIGH);
+      return {560, 110*1.2};
     }
 
     
     
     // tag not recognized
     return {currentDelay_w, currentDelay_m};
+}
+
+// turns off all leds
+void turnOffLeds() {
+  for(int i = 0; i < sizeof(leds); i++) {
+    digitalWrite(leds[i], LOW);
+  }
 }
 
 // pumps water changes the water indicator ..
