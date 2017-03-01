@@ -18,7 +18,7 @@ const char tag_2_A[] = "210082C63B5E";
 const char tag_2_B[] = "210082CC1778";
 const char tag_2_C[] = "430003D2B527";
 
-SoftwareSerial rfidReader(8,9);
+SoftwareSerial rfidReader(2,3);
 String tagString;
 char tagNumber[14];
 boolean receivedTag;
@@ -28,17 +28,19 @@ int currentDelay_m = 0;
 
 
 // led outputs
-const int led_water1  = 1;
-const int led_water2  = 2;
-const int led_map1    = 3;
-const int led_map2    = 4;
-const int led_map3    = 5;
+const int led_map4    = 4;
+const int led_map5    = 5;
+const int led_map6    = 6;
+const int led_map7    = 7;
+const int led_map8    = 8;
+const int led_map9    = 9;
+const int led_map10   = 10;
 
 Servo servoMotor;
 // outputs for motor and pump..
-const int pumpOutput   = 6; 
-const int magnetOutput = 10; // electromagnet removing water from tank
-const int motorOutput  = 7;
+const int pumpOutput   = 11; 
+const int magnetOutput = 12; // electromagnet removing water from tank
+const int motorOutput  = 13;
 
 unsigned long currentMillis;
 unsigned long lastMillis;
