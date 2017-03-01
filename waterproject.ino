@@ -17,7 +17,7 @@ const char banana[] = "410043429BDB";
 const char beer[] = "210082C63B5E";
 const char tomato[] = "210082CC1778";
 
-SoftwareSerial rfidReader(8,9);
+SoftwareSerial rfidReader(2,3);
 String tagString;
 char tagNumber[14];
 boolean receivedTag;
@@ -27,17 +27,19 @@ int currentDelay_m = 0;
 
 
 // led outputs
-const int led_water1  = 1;
-const int led_water2  = 2;
-const int led_map1    = 3;
-const int led_map2    = 4;
-const int led_map3    = 5;
+const int led_map4    = 4;
+const int led_map5    = 5;
+const int led_map6    = 6;
+const int led_map7    = 7;
+const int led_map8    = 8;
+const int led_map9    = 9;
+const int led_map10   = 10;
 
 Servo servoMotor;
 // outputs for motor and pump..
-const int pumpOutput   = 6; 
-const int magnetOutput = 10; // electromagnet removing water from tank
-const int motorOutput  = 7;
+const int pumpOutput   = 11; 
+const int magnetOutput = 12; // electromagnet removing water from tank
+const int motorOutput  = 13;
 
 unsigned long currentMillis;
 unsigned long lastMillis;
@@ -52,11 +54,6 @@ void setup() {
   pinMode(pumpOutput, OUTPUT);
   pinMode(magnetOutput, OUTPUT);
   pinMode(motorOutput, OUTPUT);
-  pinMode(led_water1, OUTPUT);
-  pinMode(led_water2, OUTPUT);
-  pinMode(led_map1, OUTPUT);
-  pinMode(led_map2, OUTPUT);
-  pinMode(led_map3, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
 
   // starts reading of rfid..
@@ -197,5 +194,7 @@ void pump(int duration_w, int duration_m) {
   // turn off the waterpump
   digitalWrite(magnetOutput, LOW);
   digitalWrite(pumpOutput, LOW);
+
+  Serial.println("all done");
 }
 
