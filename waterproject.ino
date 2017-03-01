@@ -41,14 +41,15 @@ const int magnetOutput = 10; // electromagnet removing water from tank
 const int motorOutput  = 7;
 
 unsigned long currentMillis;
-unsigned long previousMillis;
+unsigned long lastMillis;
 unsigned long duration;
 unsigned long second = 1000; // one second in millis
 unsigned long pumpstart ;
-
+unsigned long resetTime = 10000 ;
 int counter = 0;
 
 void setup() {
+  currentMillis = millis(); 
   pinMode(pumpOutput, OUTPUT);
   pinMode(magnetOutput, OUTPUT);
   pinMode(motorOutput, OUTPUT);
@@ -66,15 +67,16 @@ void setup() {
 }
 
 void loop() {
-
   receivedTag=false;
   
   while (rfidReader.available()){
     int BytesRead = rfidReader.readBytesUntil(3, tagNumber, 15);//EOT (3) is the last character in tag 
     receivedTag=true;
-  }  
- 
-  if (receivedTag){
+  }
+ // currentMillis = millis();
+  
+  if (receivedTag){ 
+       
     tagString = tagNumber;
     Serial.println();
     Serial.print("Tag Number: ");
@@ -105,6 +107,19 @@ void loop() {
     pump((delayTime_w - currentDelay_w), (delayTime_m - currentDelay_m));
     currentDelay_w = abs(delayTime_w);
     currentDelay_m = abs(delayTime_m);
+    lastMillis = millis();
+    
+
+  } else if(millis() - lastMillis  >= resetTime) {
+
+    if(currentDelay_w = 0) {
+      return;
+    }
+  
+    pump(-currentDelay_w, -currentDelay_m);
+    currentDelay_w = 0;
+    currentDelay_m = 0;
+    
   }
 }
 
@@ -125,6 +140,30 @@ delayPair determineDelay(String tagNum) {
       return {1000, 500};
     }
 
+     if(tagNum.substring(1,13)==tag_1_A) {
+      return {1000, 500};
+    }
+
+     if(tagNum.substring(1,13)==tag_1_B) {
+      return {1000, 500};
+    }
+     
+     if(tagNum.substring(1,13)==tag_1_C) {
+      return {1000, 500};
+    }
+
+     if(tagNum.substring(1,13)==tag_2_A) {
+      return {1000, 500};
+    }
+     
+     if(tagNum.substring(1,13)==tag_2_B) {
+      return {1000, 500};
+    }
+
+     if(tagNum.substring(1,13)==tag_2_C) {
+      return {1000, 500};
+    }
+    
     // tag not recognized
     return {currentDelay_w, currentDelay_m};
 }
@@ -133,7 +172,7 @@ delayPair determineDelay(String tagNum) {
 void pump(int duration_w, int duration_m) {
   int servoAngle = -180;
   
-  if(duration_w < 0) {
+  if(duration_m < 0) {
     servoAngle *= -1; // reverse direction of servo
   }
 
