@@ -8,17 +8,16 @@ struct delayPair {
 };
 
 // rfid tags..
-const char tag_0_A[] = "43000970A49E";
-const char tag_0_B[] = "2100834E01ED";
-const char tag_0_C[] = "4100468935BB";
-const char tag_1_A[] = "4100427798EC";
-const char tag_1_B[] = "41004285F274";
-const char tag_1_C[] = "410043429BDB";
-const char tag_2_A[] = "210082C63B5E";
-const char tag_2_B[] = "210082CC1778";
-const char tag_2_C[] = "430003D2B527";
+const char beef[] = "43000970A49E";
+const char mango[] = "2100834E01ED";
+const char olive[] = "4100468935BB";
+const char chicken[] = "4100427798EC";
+const char coffee[] = "41004285F274";
+const char banana[] = "410043429BDB";
+const char beer[] = "210082C63B5E";
+const char tomato[] = "210082CC1778";
 
-SoftwareSerial rfidReader(2,3);
+SoftwareSerial rfidReader(8,9);
 String tagString;
 char tagNumber[14];
 boolean receivedTag;
@@ -28,19 +27,17 @@ int currentDelay_m = 0;
 
 
 // led outputs
-const int led_map4    = 4;
-const int led_map5    = 5;
-const int led_map6    = 6;
-const int led_map7    = 7;
-const int led_map8    = 8;
-const int led_map9    = 9;
-const int led_map10   = 10;
+const int led_water1  = 1;
+const int led_water2  = 2;
+const int led_map1    = 3;
+const int led_map2    = 4;
+const int led_map3    = 5;
 
 Servo servoMotor;
 // outputs for motor and pump..
-const int pumpOutput   = 11; 
-const int magnetOutput = 12; // electromagnet removing water from tank
-const int motorOutput  = 13;
+const int pumpOutput   = 6; 
+const int magnetOutput = 10; // electromagnet removing water from tank
+const int motorOutput  = 7;
 
 unsigned long currentMillis;
 unsigned long lastMillis;
@@ -130,41 +127,39 @@ delayPair determineDelay(String tagNum) {
     
     rfidReader.flush();
 
-    if(tagNum.substring(1,13)==tag_0_A) {
-      return {7000, 3000};
+    if(tagNum.substring(1,13)==beef) {
+      return {17200, 3570};
     }
 
-    if(tagNum.substring(1,13)==tag_0_B) {
-      return {5000, 1000};
+    if(tagNum.substring(1,13)==mango) {
+      return {8240, 1073};
     }
 
-    if(tagNum.substring(1,13)==tag_0_C) {
-      return {1000, 500};
+    if(tagNum.substring(1,13)==olive) {
+      return {5200, 1070};
     }
 
-     if(tagNum.substring(1,13)==tag_1_A) {
-      return {1000, 500};
+     if(tagNum.substring(1,13)==chicken) {
+      return {4800, 1010};
     }
 
-     if(tagNum.substring(1,13)==tag_1_B) {
-      return {1000, 500};
+     if(tagNum.substring(1,13)==coffee) {
+      return {3200, 650};
     }
      
-     if(tagNum.substring(1,13)==tag_1_C) {
-      return {1000, 500};
+     if(tagNum.substring(1,13)==banana) {
+      return {2320, 480};
     }
 
-     if(tagNum.substring(1,13)==tag_2_A) {
-      return {1000, 500};
+     if(tagNum.substring(1,13)==beer) {
+      return {1120, 240};
     }
      
-     if(tagNum.substring(1,13)==tag_2_B) {
-      return {1000, 500};
+     if(tagNum.substring(1,13)==tomato) {
+      return {560, 110};
     }
 
-     if(tagNum.substring(1,13)==tag_2_C) {
-      return {1000, 500};
-    }
+    
     
     // tag not recognized
     return {currentDelay_w, currentDelay_m};
