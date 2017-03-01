@@ -8,7 +8,8 @@ struct delayPair {
 };
 
 // rfid tags..
-const char beef[]    = "43000970A49E";
+//const char beef[]    = "43000970A49E";
+const char beef[]    = "2100834E01ED";
 const char mango[]   = "2100834E01ED";
 const char olive[]   = "4100468935BB";
 const char chicken[] = "4100427798EC";
@@ -71,6 +72,8 @@ void setup() {
   pinMode(led_germany, OUTPUT);
   pinMode(led_brazil, OUTPUT);
   pinMode(led_spain, OUTPUT);
+    
+  digitalWrite(pumpOutput, LOW); 
 
   // starts reading of rfid..
   Serial.begin(9600);
@@ -122,7 +125,7 @@ void loop() {
     lastMillis = millis();
     
 
-  } else if(millis() - lastMillis  >= resetTime) {
+  } /*else if(millis() - lastMillis  >= resetTime) {
 
     if(currentDelay_w = 0) {
       return;
@@ -132,7 +135,7 @@ void loop() {
     currentDelay_w = 0;
     currentDelay_m = 0;
     
-  }
+  }*/
 }
 
 // returns motor delay time depending on tagnumber
@@ -141,45 +144,46 @@ delayPair determineDelay(String tagNum) {
     rfidReader.flush();
 
     turnOffLeds(); // turns off all leds
+    const int hoes = 1500; // time it takes for the water to flow through the hoes
 
     if(tagNum.substring(1,13)==beef) {
       digitalWrite(led_usa, HIGH);
-      return {17200, 3570*1.2};
+      return {17200+hoes, 3570*1.2};
     }
 
     if(tagNum.substring(1,13)==mango) {
       digitalWrite(led_thailand, HIGH);
-      return {8240, 1073*1.2};
+      return {8240+hoes, 1730*1.2};
     }
 
     if(tagNum.substring(1,13)==olive) {
       digitalWrite(led_spain, HIGH);
-      return {5200, 1070*1.2};
+      return {5200+hoes, 1070*1.2};
     }
 
      if(tagNum.substring(1,13)==chicken) {
       digitalWrite(led_china, HIGH);
-      return {4800, 1010*1.2};
+      return {4800+hoes, 1010*1.2};
     }
 
      if(tagNum.substring(1,13)==coffee) {
       digitalWrite(led_brazil, HIGH);
-      return {3200, 650*1.2};
+      return {3200+hoes, 650*1.2};
     }
      
      if(tagNum.substring(1,13)==banana) {
       digitalWrite(led_ecuador, HIGH);
-      return {2320, 480*1.2};
+      return {2320+hoes, 480*1.2};
     }
 
      if(tagNum.substring(1,13)==beer) {
       digitalWrite(led_germany, HIGH);
-      return {1120, 240*1.2};
+      return {1120+hoes, 240*1.2};
     }
      
      if(tagNum.substring(1,13)==tomato) {
       digitalWrite(led_china, HIGH);
-      return {560, 110*1.2};
+      return {560+hoes, 110*1.2};
     }
 
     
@@ -197,6 +201,7 @@ void turnOffLeds() {
 
 // pumps water changes the water indicator ..
 void pump(int duration_w, int duration_m) {
+  
   int servoAngle = -180;
   
   if(duration_m < 0) {
@@ -212,9 +217,12 @@ void pump(int duration_w, int duration_m) {
   // time than the waterpump
 
   if(duration_w < 0) {
-    digitalWrite(magnetOutput, HIGH); // remove water..
+    Serial.println("REMOVE WATER!!!");
+    digitalWrite(magnetOutput, HIGH); 
+    digitalWrite(pumpOutput, LOW); 
   } else {
-    digitalWrite(pumpOutput, HIGH);   // add water..
+    digitalWrite(magnetOutput, LOW);
+    digitalWrite(pumpOutput, HIGH); 
   }
   
   delay(abs(duration_m));
