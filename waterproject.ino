@@ -1,15 +1,36 @@
 #include <Adafruit_NeoPixel.h>
-#ifdef __AVR__
-  #include <avr/power.h>
-#endif
 
 #include <Servo.h>
 #include <SoftwareSerial.h>
 #include <avr/pgmspace.h>
 
-#define COLORLED A0
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(60, COLORLED, NEO_GRB + NEO_KHZ800);
+#define COLORLED      A0
+#define led_usa       4
+#define led_ecuador   5
+#define led_thailand  6
+#define led_china     7
+#define led_germany   8
+#define led_brazil    9
+#define led_spain     10
 
+#define pumpOutput   11 // pump for controlling water
+#define magnetOutput 12 // electromagnet removing water from tank
+#define motorOutput  13 // motor for controlling indicator
+
+const int leds[] = { led_usa,
+                     led_ecuador,
+                     led_ecuador,
+                     led_thailand,
+                     led_china,
+                     led_germany,
+                     led_brazil,
+                     led_spain };
+
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(60, COLORLED, NEO_GRB + NEO_KHZ800);
+SoftwareSerial rfidReader(2,3);
+Servo servoMotor;
+
+// data structure for the pump (water) and motor delay
 struct delayPair {
     int water;
     int motor;
@@ -25,46 +46,14 @@ const char banana[]  = "410043429BDB";
 const char beer[]    = "210082C63B5E";
 const char tomato[]  = "210082CC1778";
 
-SoftwareSerial rfidReader(2,3);
+
 String tagString;
 char tagNumber[14];
 boolean receivedTag;
 
+// varibales for indicating the current water/indicator level
 int currentDelay_w = 0;
 int currentDelay_m = 0;
-
-
-// led outputs
-const int led_usa      = 4;  // beef
-const int led_ecuador  = 5;  // banana
-const int led_thailand = 6;  // mango
-const int led_china    = 7;  // chicken, tomatoe
-const int led_germany  = 8;  // beer
-const int led_brazil   = 9;  // coffee
-const int led_spain    = 10; // olive
-
-const int leds[] = { led_usa,
-                     led_ecuador,
-                     led_ecuador,
-                     led_thailand,
-                     led_china,
-                     led_germany,
-                     led_brazil,
-                     led_spain };
-
-Servo servoMotor;
-// outputs for motor and pump..
-const int pumpOutput   = 11; 
-const int magnetOutput = 12; // electromagnet removing water from tank
-const int motorOutput  = 13;
-
-unsigned long currentMillis;
-unsigned long lastMillis;
-unsigned long duration;
-unsigned long second = 1000; // one second in millis
-unsigned long pumpstart ;
-unsigned long resetTime = 10000 ;
-int counter = 0;
 
 void setup() {
   strip.begin();
@@ -81,9 +70,6 @@ void setup() {
   pinMode(led_brazil, OUTPUT);
   pinMode(led_spain, OUTPUT);
     
-  digitalWrite(pumpOutput, LOW); 
-  digitalWrite(led_usa, HIGH);
-
   // starts reading of rfid..
   Serial.begin(9600);
   rfidReader.begin(9600); // the RDM6300 runs at 9600bps
@@ -91,27 +77,23 @@ void setup() {
 }
 
 void loop() {
-  receivedTag=false;
+  
+  receivedTag = false;
   
   while (rfidReader.available()){
-    int BytesRead = rfidReader.readBytesUntil(3, tagNumber, 15);//EOT (3) is the last character in tag 
-    receivedTag=true;
+    int BytesRead = rfidReader.readBytesUntil(3, tagNumber, 15); //EOT (3) is the last character in tag 
+    receivedTag = true;
   }
- // currentMillis = millis();
   
   if (receivedTag){ 
        
     tagString = tagNumber;
-    Serial.println();
-    Serial.print("Tag Number: ");
-    Serial.println(tagString);
     
     int delayTime_w = 0; // delay time for filling the water
     int delayTime_m = 0; // delay time for the motor to control the tactile indicator
     
-    delayPair delayTime = determineDelay(tagString);
-    delayTime_w = delayTime.water;
-    delayTime_m = delayTime.motor;
+    delayTime_w = determineDelay(tagString).water;
+    delayTime_m = determineDelay(tagString).motor;
     
     Serial.println("delayTime_w: ");
     Serial.println(delayTime_w);
@@ -143,7 +125,7 @@ void loop() {
       c = strip.Color(delayTime_w/500, delayTime_w/100, 255/(delayTime_w/500));
     }
     
-
+    // coloring all leds
     for(uint16_t i=0; i<strip.numPixels(); i++) {
       strip.setPixelColor(i, c);
       strip.show();
@@ -152,9 +134,6 @@ void loop() {
     pump((delayTime_w - currentDelay_w), (delayTime_m - currentDelay_m));
     currentDelay_w = abs(delayTime_w);
     currentDelay_m = abs(delayTime_m);
-    lastMillis = millis();
-    
-
   } 
 }
 
@@ -206,9 +185,7 @@ delayPair determineDelay(String tagNum) {
       return {560+hoes, (110*1.2)};
     }
 
-    
-    
-    // tag not recognized
+    // if tag not recognized, let water level remain the same..
     return {currentDelay_w, currentDelay_m};
 }
 
