@@ -1,6 +1,14 @@
+#include <Adafruit_NeoPixel.h>
+#ifdef __AVR__
+  #include <avr/power.h>
+#endif
+
 #include <Servo.h>
 #include <SoftwareSerial.h>
 #include <avr/pgmspace.h>
+
+#define COLORLED A0
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(60, COLORLED, NEO_GRB + NEO_KHZ800);
 
 struct delayPair {
     int water;
@@ -8,8 +16,7 @@ struct delayPair {
 };
 
 // rfid tags..
-//const char beef[]    = "43000970A49E";
-const char beef[]    = "2100834E01ED";
+const char beef[]    = "43000970A49E";
 const char mango[]   = "2100834E01ED";
 const char olive[]   = "4100468935BB";
 const char chicken[] = "4100427798EC";
@@ -60,7 +67,8 @@ unsigned long resetTime = 10000 ;
 int counter = 0;
 
 void setup() {
-  currentMillis = millis(); 
+  strip.begin();
+  strip.show(); // Initialize all pixels to 'off'
   
   pinMode(pumpOutput, OUTPUT);
   pinMode(magnetOutput, OUTPUT);
@@ -74,6 +82,7 @@ void setup() {
   pinMode(led_spain, OUTPUT);
     
   digitalWrite(pumpOutput, LOW); 
+  digitalWrite(led_usa, HIGH);
 
   // starts reading of rfid..
   Serial.begin(9600);
@@ -119,23 +128,34 @@ void loop() {
       return;
     }
 
+    uint32_t c;
+
+    if(delayTime_w > 15000) { // red
+      c = strip.Color(255, 0, 0);
+      
+    } else if (delayTime_w > 8000) {  // orange
+      c = strip.Color(255, 100, delayTime_w/500);
+      
+    } else if (delayTime_w > 5000) {  // yellow
+      c = strip.Color(255, 255, delayTime_w/500);
+      
+    } else { // blue
+      c = strip.Color(delayTime_w/500, delayTime_w/100, 255/(delayTime_w/500));
+    }
+    
+
+    for(uint16_t i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, c);
+      strip.show();
+    }
+
     pump((delayTime_w - currentDelay_w), (delayTime_m - currentDelay_m));
     currentDelay_w = abs(delayTime_w);
     currentDelay_m = abs(delayTime_m);
     lastMillis = millis();
     
 
-  } /*else if(millis() - lastMillis  >= resetTime) {
-
-    if(currentDelay_w = 0) {
-      return;
-    }
-  
-    pump(-currentDelay_w, -currentDelay_m);
-    currentDelay_w = 0;
-    currentDelay_m = 0;
-    
-  }*/
+  } 
 }
 
 // returns motor delay time depending on tagnumber
@@ -148,42 +168,42 @@ delayPair determineDelay(String tagNum) {
 
     if(tagNum.substring(1,13)==beef) {
       digitalWrite(led_usa, HIGH);
-      return {17200+hoes, 3570*1.2};
+      return {17200+hoes, (3570*1.2)};
     }
 
     if(tagNum.substring(1,13)==mango) {
       digitalWrite(led_thailand, HIGH);
-      return {8240+hoes, 1730*1.2};
+      return {8240+hoes, (1730*1.2)};
     }
 
     if(tagNum.substring(1,13)==olive) {
       digitalWrite(led_spain, HIGH);
-      return {5200+hoes, 1070*1.2};
+      return {5200+hoes, (1070*1.2)};
     }
 
      if(tagNum.substring(1,13)==chicken) {
       digitalWrite(led_china, HIGH);
-      return {4800+hoes, 1010*1.2};
+      return {4800+hoes, (1010*1.2)};
     }
 
      if(tagNum.substring(1,13)==coffee) {
       digitalWrite(led_brazil, HIGH);
-      return {3200+hoes, 650*1.2};
+      return {3200+hoes, (650*1.2)};
     }
      
      if(tagNum.substring(1,13)==banana) {
       digitalWrite(led_ecuador, HIGH);
-      return {2320+hoes, 480*1.2};
+      return {2320+hoes, (480*1.2)};
     }
 
      if(tagNum.substring(1,13)==beer) {
       digitalWrite(led_germany, HIGH);
-      return {1120+hoes, 240*1.2};
+      return {1120+hoes, (240*1.2)};
     }
      
      if(tagNum.substring(1,13)==tomato) {
       digitalWrite(led_china, HIGH);
-      return {560+hoes, 110*1.2};
+      return {560+hoes, (110*1.2)};
     }
 
     
