@@ -19,7 +19,6 @@
 
 const int leds[] = { led_usa,
                      led_ecuador,
-                     led_ecuador,
                      led_thailand,
                      led_china,
                      led_germany,
@@ -45,6 +44,7 @@ const char coffee[]  = "41004285F274";
 const char banana[]  = "410043429BDB";
 const char beer[]    = "210082C63B5E";
 const char tomato[]  = "210082CC1778";
+const char reset[]   = "430003D2B527";
 
 
 String tagString;
@@ -70,10 +70,17 @@ void setup() {
   pinMode(led_brazil, OUTPUT);
   pinMode(led_spain, OUTPUT);
     
+  // start off by draining the tube for 10 seconds
+  digitalWrite(magnetOutput, HIGH);
+  digitalWrite(pumpOutput, LOW);
+  delay(10000);
+  digitalWrite(magnetOutput, LOW);
+  
   // starts reading of rfid..
   Serial.begin(9600);
   rfidReader.begin(9600); // the RDM6300 runs at 9600bps
   Serial.println("\n\n\nRFID Reader...ready!");
+
 }
 
 void loop() {
@@ -139,52 +146,58 @@ void loop() {
 
 // returns motor delay time depending on tagnumber
 delayPair determineDelay(String tagNum) {
+
+    Serial.println(tagNum.substring(1,13));
     
     rfidReader.flush();
 
     turnOffLeds(); // turns off all leds
-    const int hoes = 1500; // time it takes for the water to flow through the hoes
 
     if(tagNum.substring(1,13)==beef) {
       digitalWrite(led_usa, HIGH);
-      return {17200+hoes, (3570*1.2)};
+      return {9200, (3570*1.2)};
     }
 
     if(tagNum.substring(1,13)==mango) {
       digitalWrite(led_thailand, HIGH);
-      return {8240+hoes, (1730*1.2)};
+      return {6040, (1730*1.2)};
     }
 
     if(tagNum.substring(1,13)==olive) {
       digitalWrite(led_spain, HIGH);
-      return {5200+hoes, (1070*1.2)};
+      return {4200, (1070*1.2)};
     }
 
      if(tagNum.substring(1,13)==chicken) {
       digitalWrite(led_china, HIGH);
-      return {4800+hoes, (1010*1.2)};
+      return {3800, (1010*1.2)};
     }
 
      if(tagNum.substring(1,13)==coffee) {
       digitalWrite(led_brazil, HIGH);
-      return {3200+hoes, (650*1.2)};
+      return {3200, (650*1.2)};
     }
      
      if(tagNum.substring(1,13)==banana) {
       digitalWrite(led_ecuador, HIGH);
-      return {2320+hoes, (480*1.2)};
+      return {2320, (480*1.2)};
     }
 
      if(tagNum.substring(1,13)==beer) {
       digitalWrite(led_germany, HIGH);
-      return {1120+hoes, (240*1.2)};
+      return {1120, (240*1.2)};
     }
      
      if(tagNum.substring(1,13)==tomato) {
       digitalWrite(led_china, HIGH);
-      return {560+hoes, (110*1.2)};
+      return {500, (110*1.2)};
     }
 
+    if(tagNum.substring(1,13)==reset) {
+      return {0, 0};
+    }
+    
+    
     // if tag not recognized, let water level remain the same..
     return {currentDelay_w, currentDelay_m};
 }
@@ -217,6 +230,7 @@ void pump(int duration_w, int duration_m) {
     Serial.println("REMOVE WATER!!!");
     digitalWrite(magnetOutput, HIGH); 
     digitalWrite(pumpOutput, LOW); 
+
   } else {
     digitalWrite(magnetOutput, LOW);
     digitalWrite(pumpOutput, HIGH); 
@@ -226,9 +240,13 @@ void pump(int duration_w, int duration_m) {
 
   // turn the motor for the indicator off, and keep the pump on..
   servoMotor.detach();
-  
-  delay(abs(duration_w - duration_m));
 
+  if(duration_w < 0) {
+    delay(abs(duration_w - duration_m)*4);
+  } else {
+    delay(abs(duration_w - duration_m));
+  }
+  
   // turn off the waterpump
   digitalWrite(magnetOutput, LOW);
   digitalWrite(pumpOutput, LOW);
